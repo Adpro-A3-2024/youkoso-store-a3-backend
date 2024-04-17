@@ -1,0 +1,44 @@
+name: Deploy Spring Boot Application with JDK 21 via Server Build with Gradle
+
+on:
+  push:
+    branches:
+      - main  # Adjust as necessary for your deployment branch
+
+jobs:
+  deploy-main:
+    name: Clone, Build, and Run
+    runs-on: ubuntu-latest
+    strategy:
+        matrix:
+          include:
+            - branch: main
+    steps:
+      - name: Executing remote SSH commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            # Ensure the application directory exists
+            cd ~/app
+
+            # Clone or pull the latest repo contents
+            if [ -d ".git" ]; then
+              git checkout ${BRANCH_NAME}
+              git pull
+            else
+              git clone git@github.com:Adpro-A3-2024/youkoso-store-a3-backend.git .
+              git checkout ${{ matrix.branch }}
+            fi
+
+            # Build the project using Gradle wrapper
+            ./gradlew build -x test
+
+            # Assume the JAR is within the build/libs directory
+            JAR_NAME=$(ls build/libs/*.jar)
+            # Run the jar in the background (update path and other options as needed)
+            nohup java -jar $JAR_NAME > log.txt 2>&1 &
+            echo "Spring Boot application deployed and started successfully!"
