@@ -30,7 +30,7 @@ jobs:
               git checkout ${BRANCH_NAME}
               git pull
             else
-              git clone git@github.com:Adpro-A3-2024/youkoso-store-a3-backend.git .
+              git clone git@github.com:Adpro-A3-2024/youkoso-store-a3-backend.git
               git checkout ${{ matrix.branch }}
             fi
 
